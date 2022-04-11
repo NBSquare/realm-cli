@@ -10,6 +10,7 @@ import (
 
 const (
 	importPathPattern = appPathPattern + "/import"
+	pushPathPattern   = appPathPattern + "/push"
 
 	importQueryDiff     = "diff"
 	importQueryStrategy = "strategy"
@@ -56,5 +57,25 @@ func (c *client) doImport(groupID, appID string, appData interface{}, diff bool)
 		fmt.Sprintf(importPathPattern, groupID, appID),
 		appData,
 		api.RequestOptions{Query: query},
+	)
+}
+
+func (c *client) Push(groupID, appID string, appMeta interface{}) error {
+	res, resErr := c.doPush(groupID, appID, appMeta)
+	if resErr != nil {
+		return resErr
+	}
+	if res.StatusCode != http.StatusNoContent {
+		return api.ErrUnexpectedStatusCode{"push", res.StatusCode}
+	}
+	return nil
+}
+
+func (c *client) doPush(groupID, appID string, appMeta interface{}) (*http.Response, error) {
+	return c.doJSON(
+		http.MethodPost,
+		fmt.Sprintf(pushPathPattern, groupID, appID),
+		appMeta,
+		api.RequestOptions{},
 	)
 }
