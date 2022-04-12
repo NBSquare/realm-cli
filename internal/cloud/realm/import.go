@@ -73,7 +73,7 @@ func (c *client) Push(groupID, appID string, appMeta interface{}) error {
 
 func (c *client) doPush(groupID, appID string, appMeta interface{}) (*http.Response, error) {
 	return c.doJSON(
-		http.MethodPost,
+		http.MethodPatch,
 		fmt.Sprintf(pushPathPattern, groupID, appID),
 		appMeta,
 		api.RequestOptions{},
