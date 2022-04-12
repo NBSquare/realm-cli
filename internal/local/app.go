@@ -214,6 +214,15 @@ func (a App) WriteConfig() error {
 	return WriteFile(filepath.Join(a.RootDir, a.Config.String()), 0666, bytes.NewReader(data))
 }
 
+// WriteAppMeta writes the .mdb/app_meta.json config to the specified path given a remote app and config version
+func (a App) WriteAppMeta() error {
+	data, err := MarshalJSON(a.AppMeta)
+	if err != nil {
+		return err
+	}
+	return WriteFile(filepath.Join(a.RootDir, NameDotMDB, FileAppMeta.String()), 0666, bytes.NewReader(data))
+}
+
 // LoadApp will load the local app data and app config
 func LoadApp(path string) (App, error) {
 	app, appOK, appErr := FindApp(path)

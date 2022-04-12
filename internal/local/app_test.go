@@ -399,6 +399,71 @@ func TestAppWriteConfig(t *testing.T) {
 	})
 }
 
+func TestAppWriteAppMeta(t *testing.T) {
+	t.Run("Should write the app meta config contents successfully", func(t *testing.T) {
+		for _, tc := range []struct {
+			description string
+			appMeta     AppMeta
+			contents    string
+		}{
+			{
+				description: "with an empty app meta",
+				appMeta:     AppMeta{},
+				contents: `{
+    "config_version": 0
+}
+`,
+			}, {
+				description: "with a populated app meta using version 20180301",
+				appMeta:     AppMeta{"groupID", "appID", realm.AppConfigVersion20180301},
+				contents: `{
+    "group_id": "groupID",
+    "app_id": "appID",
+    "config_version": 20180301
+}
+`,
+			},
+			{
+				description: "with a populated app meta using version 20200603",
+				appMeta:     AppMeta{"groupID", "appID", realm.AppConfigVersion20200603},
+				contents: `{
+    "group_id": "groupID",
+    "app_id": "appID",
+    "config_version": 20200603
+}
+`,
+			},
+			{
+				description: "with a populated app meta using version 20210101",
+				appMeta:     AppMeta{"groupID", "appID", realm.AppConfigVersion20210101},
+				contents: `{
+    "group_id": "groupID",
+    "app_id": "appID",
+    "config_version": 20210101
+}
+`,
+			},
+		} {
+			t.Run(tc.description, func(t *testing.T) {
+				tmpDir, teardown, err := u.NewTempDir("write_cli_config")
+				assert.Nil(t, err)
+				defer teardown()
+
+				app := &App{
+					RootDir: tmpDir,
+					Config:  FileRealmConfig,
+					AppMeta: tc.appMeta,
+				}
+				assert.Nil(t, app.WriteAppMeta())
+
+				data, dataErr := ioutil.ReadFile(filepath.Join(tmpDir, NameDotMDB, FileAppMeta.String()))
+				assert.Nil(t, dataErr)
+				assert.Equal(t, tc.contents, string(data))
+			})
+		}
+	})
+}
+
 func TestAppWrite20180301(t *testing.T) {
 	t.Run("should initialize an empty project", func(t *testing.T) {
 		tmpDir, cleanupTmpDir, err := u.NewTempDir("")
